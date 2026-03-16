@@ -1,8 +1,12 @@
-# 📝 Blog Management System
-
-![Java](https://img.shields.io/badge/Java-17-blue?logo=java)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.3-brightgreen?logo=spring-boot)
-![Maven](https://img.shields.io/badge/Maven-3.8%2B-orange?logo=apache-maven)
+<div align="center">
+  <h1>📝 Blog Management System</h1>
+  <p>
+    <img src="https://img.shields.io/badge/Java-17-blue?style=for-the-badge&logo=java" alt="Java"/>
+    <img src="https://img.shields.io/badge/Spring%20Boot-4.0.3-brightgreen?style=for-the-badge&logo=spring-boot" alt="Spring Boot"/>
+    <img src="https://img.shields.io/badge/Maven-3.8%2B-orange?style=for-the-badge&logo=apache-maven" alt="Maven"/>
+    <a href="https://opensource.org/licenses/MIT" target="_blank"><img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="MIT License"/></a>
+  </p>
+</div>
 
 > Sistema profesional para la gestión de blogs, desarrollado en Java y Spring Boot. Permite administrar usuarios, publicaciones y comentarios, con autenticación y autorización seguras.
 
