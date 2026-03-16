@@ -1,0 +1,654 @@
+{
+	"info": {
+		"_postman_id": "blog-management-system-collection",
+		"name": "Blog Management System",
+		"description": "# 📬 Blog Management System — API Curls\n\n> Colección de curls listos para importar en **Postman** o ejecutar desde terminal.\n\n> 🔒 Los requests con candado requieren el header `Authorization: Bearer {{token}}`\n\n---\n\n## 📑 Índice\n\n| Sección | Endpoints |\n| --- | --- |\n| Health | Estado de la aplicación |\n| Auth | Register, Login |\n| Posts | CRUD completo |\n| Comments | CRUD completo |\n| Seguridad | Casos de roles y permisos |\n| Validaciones | Casos de error |\n\n---\n\n## 📋 Respuestas esperadas\n\n### ✅ Respuesta exitosa — Auth\n\n```json\n{\n  \"status\": 201,\n  \"message\": \"Usuario registrado exitosamente\",\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzM4NCJ9...\",\n    \"tokenType\": \"Bearer\",\n    \"expiresIn\": 86400,\n    \"email\": \"usuario@email.com\",\n    \"role\": \"USER\"\n  }\n}\n```\n\n### ✅ Respuesta exitosa — Post\n\n```json\n{\n  \"status\": 200,\n  \"message\": \"Post obtenido exitosamente\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Mi primer post\",\n    \"content\": \"Contenido...\",\n    \"createdAt\": \"2026-03-10T10:00:00\",\n    \"updatedAt\": \"2026-03-10T10:00:00\",\n    \"authorEmail\": \"usuario@email.com\",\n    \"comments\": []\n  }\n}\n```\n\n### ❌ No autenticado (401)\n\n```json\n{\n  \"status\": 401,\n  \"error\": \"UNAUTHORIZED\",\n  \"message\": \"No estás autenticado. Proporciona un token válido.\",\n  \"path\": \"/api/posts\",\n  \"timestamp\": \"2026-03-10T10:00:00\"\n}\n```\n\n### ❌ Sin permisos (403)\n\n```json\n{\n  \"status\": 403,\n  \"error\": \"FORBIDDEN\",\n  \"message\": \"No tienes permisos para modificar este post\",\n  \"path\": \"/api/posts/1\",\n  \"timestamp\": \"2026-03-10T10:00:00\"\n}\n```\n\n### ❌ Email duplicado (409)\n\n```json\n{\n  \"status\": 409,\n  \"error\": \"CONFLICT\",\n  \"message\": \"El email ya está registrado: usuario@email.com\",\n  \"path\": \"/api/auth/register\",\n  \"timestamp\": \"2026-03-10T10:00:00\"\n}\n```\n\n### ❌ Error de validación (400)\n\n```json\n{\n  \"status\": 400,\n  \"error\": \"VALIDATION_ERROR\",\n  \"message\": \"Error de validación en los campos enviados\",\n  \"path\": \"/api/auth/register\",\n  \"timestamp\": \"2026-03-10T10:00:00\",\n  \"fieldErrors\": {\n    \"password\": \"La contraseña debe tener entre 8 y 100 caracteres\"\n  }\n}\n```\n\n### ❌ Recurso no encontrado (404)\n\n```json\n{\n  \"status\": 404,\n  \"error\": \"NOT_FOUND\",\n  \"message\": \"Post no encontrado con id: 999\",\n  \"path\": \"/api/posts/999\",\n  \"timestamp\": \"2026-03-10T10:00:00\"\n}\n```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "💚 Health",
+			"description": "Estado de la aplicación. No requiere token.",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/actuator/health",
+							"host": ["{{base_url}}"],
+							"path": ["actuator", "health"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🔐 Auth",
+			"description": "Endpoints de autenticación. Son públicos, no requieren token.\n\nAl ejecutar Login o Register, el token se guarda automáticamente en la variable `{{token}}`.",
+			"item": [
+				{
+					"name": "Registrar usuario",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.data.token);",
+									"    pm.test('Token guardado en variable', function () {",
+									"        pm.expect(jsonData.data.token).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"usuario@email.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Iniciar sesión",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set('token', jsonData.data.token);",
+									"    pm.test('Token guardado en variable', function () {",
+									"        pm.expect(jsonData.data.token).to.be.a('string');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"usuario@email.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📝 Posts",
+			"description": "CRUD completo de posts. Todas las rutas requieren Bearer Token.",
+			"item": [
+				{
+					"name": "🔒 Crear un post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Mi primer post\",\n    \"content\": \"Este es el contenido de mi primer post en el blog\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Obtener todos los posts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/posts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Obtener post por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/posts/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Obtener posts por autor",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/posts/author/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts", "author", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Actualizar un post",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Mi primer post actualizado\",\n    \"content\": \"Este es el contenido actualizado del post\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Eliminar un post (soft delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/posts/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "💬 Comments",
+			"description": "CRUD completo de comentarios. Todas las rutas requieren Bearer Token.",
+			"item": [
+				{
+					"name": "🔒 Crear un comentario",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Excelente post, muy informativo!\",\n    \"postId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Obtener comentarios por post",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/comments/post/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "post", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Obtener comentario por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/comments/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Actualizar un comentario",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Comentario actualizado con mas detalle\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔒 Eliminar un comentario (soft delete)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/comments/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🛡️ Pruebas de Seguridad",
+			"description": "Curls para verificar que la autenticación y autorización funcionan correctamente.",
+			"item": [
+				{
+					"name": "🔴 Crear post sin token → 401",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Post sin autenticar\",\n    \"content\": \"Esto debería fallar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts"]
+						}
+					}
+				},
+				{
+					"name": "🔴 Obtener posts sin token → 401",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/posts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts"]
+						}
+					}
+				},
+				{
+					"name": "🔴 Obtener comentarios sin token → 401",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/comments/post/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "post", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔴 Crear post con token inválido → 401",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer token_invalido_123"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Post con token inválido\",\n    \"content\": \"Esto debería fallar\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts"]
+						}
+					}
+				},
+				{
+					"name": "🔴🔒 Editar post de otro usuario → 403",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Intento de editar post ajeno\",\n    \"content\": \"Esto debería fallar si no soy el dueño\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔴🔒 Eliminar comentario de otro usuario → 403",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/comments/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments", "1"]
+						}
+					}
+				},
+				{
+					"name": "🔴 Registrar email duplicado → 409",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"usuario@email.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "🔴 Login con credenciales inválidas → 401",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"usuario@email.com\",\n    \"password\": \"contraseña_incorrecta\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "⚠️ Pruebas de Validación",
+			"description": "Curls para verificar que las validaciones y el manejo de errores funcionan correctamente.",
+			"item": [
+				{
+					"name": "🔴 Registrar sin email → 400",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "🔴 Registrar con contraseña corta → 400",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@email.com\",\n    \"password\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "🔴🔒 Crear post sin título → 400",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"\",\n    \"content\": \"Contenido sin titulo\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/posts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts"]
+						}
+					}
+				},
+				{
+					"name": "🔴🔒 Crear comentario sin contenido → 400",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"\",\n    \"postId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments"]
+						}
+					}
+				},
+				{
+					"name": "🔴🔒 Obtener post que no existe → 404",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/posts/999",
+							"host": ["{{base_url}}"],
+							"path": ["api", "posts", "999"]
+						}
+					}
+				},
+				{
+					"name": "🔴🔒 Crear comentario con post inexistente → 404",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"Comentario en post inexistente\",\n    \"postId\": 999\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/comments",
+							"host": ["{{base_url}}"],
+							"path": ["api", "comments"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
+

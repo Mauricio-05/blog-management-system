@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: blog-management-system
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${DB_NAME:blogdb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret: ${JWT_SECRET:QmxvZ01hbmFnZW1lbnRTeXN0ZW1TZWNyZXRLZXkyMDI2IQ==}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
